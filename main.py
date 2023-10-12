@@ -68,3 +68,4 @@ with mlflow.start_run():
     remote_server_uri = "https://dagshub.com/J3mai/MlOps.mlflow"
     mlflow.set_tracking_uri(remote_server_uri)
     mlflow.sklearn.log_model(model, "model")
+    mlflow.end_run()
