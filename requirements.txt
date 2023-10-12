@@ -7,4 +7,5 @@ uvicorn
 deepchecks
 pytest
 streamlit
+numpy
 

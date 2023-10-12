@@ -1,19 +1,15 @@
-from urllib.parse import urlparse
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import sys
 import matplotlib.pyplot as plt  # side-stepping mpl backend
 import matplotlib.gridspec as gridspec  # subplots
-import mpld3 as mpl
 
 # Import models from scikit learn module:
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
 
 import mlflow
-from mlflow.models import infer_signature
-import mlflow.sklearn
 
 
 df = pd.read_csv("Data/data.csv", header=0)
@@ -69,10 +65,8 @@ with mlflow.start_run():
     mlflow.log_metric("mae", mae)
 
 
-    # remote_server_uri = "https://dagshub.com/krishnaik06/mlflowexperiments.mlflow"
-    # mlflow.set_tracking_uri(remote_server_uri)
-
-    tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
+    remote_server_uri = "https://dagshub.com/krishnaik06/mlflowexperiments.mlflow"
+    mlflow.set_tracking_uri(remote_server_uri)
 
     # Model registry does not work with file store
     if tracking_url_type_store != "file":
