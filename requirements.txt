@@ -1,0 +1,10 @@
+imblearn
+xgboost
+dvc
+mlflow
+fastapi
+uvicorn
+deepchecks
+pytest
+streamlit
+
