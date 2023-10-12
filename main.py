@@ -65,17 +65,6 @@ with mlflow.start_run():
     mlflow.log_metric("mae", mae)
 
 
-    remote_server_uri = "https://dagshub.com/krishnaik06/mlflowexperiments.mlflow"
+    remote_server_uri = "https://dagshub.com/J3mai/MlOps.mlflow"
     mlflow.set_tracking_uri(remote_server_uri)
-
-    # Model registry does not work with file store
-    if tracking_url_type_store != "file":
-        # Register the model
-        # There are other ways to use the Model Registry, which depends on the use case,
-        # please refer to the doc for more information:
-        # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-        mlflow.sklearn.log_model(
-            model, "model", registered_model_name="RandomForestBreastCancerClassifier"
-        )
-    else:
-        mlflow.sklearn.log_model(model, "model")
+    mlflow.sklearn.log_model(model, "model")
