@@ -1,8 +1,6 @@
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import sys
-import matplotlib.pyplot as plt  # side-stepping mpl backend
-import matplotlib.gridspec as gridspec  # subplots
 
 # Import models from scikit learn module:
 from sklearn.model_selection import train_test_split
@@ -45,6 +43,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, Y, random_state=0, test_size=0.25
 )
 
+# Model Building with MlFlow
 _max_iter = int(sys.argv[1]) if len(sys.argv) > 1 else 100
 _penalty = (
     str(sys.argv[2]) if len(sys.argv) > 2 else "l2"
@@ -71,6 +70,7 @@ with mlflow.start_run():
             _penalty, _solver, _max_iter
         )
     )
+
     print("  acurracy: %s" % acurracy)
     print("  precision_score: %s" % precision_score)
     print("  recall_score: %s" % recall_score)
