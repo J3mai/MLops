@@ -6,66 +6,86 @@ import matplotlib.gridspec as gridspec  # subplots
 
 # Import models from scikit learn module:
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
 
 import mlflow
+import mlflow.sklearn
 
 
-df = pd.read_csv("Data/data.csv", header=0)
+df = pd.read_csv("Data/diabetes.csv")
 
 # Data Wrangling
+diabets_df3 = df.copy()
+zero_col = ["Glucose", "Insulin", "SkinThickness", "BloodPressure", "BMI"]
+diabets_df3[zero_col] = diabets_df3[zero_col].replace(0, np.nan)
+for col in ["Glucose", "Insulin", "SkinThickness"]:
+    median_col = np.median(diabets_df3[diabets_df3[col].notna()][col])
+    diabets_df3[col] = diabets_df3[col].fillna(median_col)
+for col in ["BMI", "BloodPressure"]:
+    mean_col = np.mean(diabets_df3[diabets_df3[col].notna()][col])
+    diabets_df3[col] = diabets_df3[col].fillna(mean_col)
 
-df.drop("id", axis=1, inplace=True)
-df.drop("Unnamed: 32", axis=1, inplace=True)
-df["diagnosis"] = df["diagnosis"].map({"M": 1, "B": 0})
 
-Y = df["diagnosis"]
+X = pd.DataFrame(
+    diabets_df3,
+    columns=[
+        "Pregnancies",
+        "Glucose",
+        "BloodPressure",
+        "SkinThickness",
+        "Insulin",
+        "BMI",
+        "DiabetesPedigreeFunction",
+        "Age",
+    ],
+)
+Y = diabets_df3.Outcome
 X_train, X_test, y_train, y_test = train_test_split(
-    df, Y, random_state=42, test_size=0.25, shuffle=True
+    X, Y, random_state=0, test_size=0.25
 )
 
-
-def eval_metrics(actual, pred):
-    rmse = np.sqrt(metrics.mean_squared_error(actual, pred))
-    mae = metrics.mean_absolute_error(actual, pred)
-    r2 = metrics.r2_score(actual, pred)
-    return rmse, mae, r2
-
-
-n_estimators = float(sys.argv[1]) if len(sys.argv) > 1 else 100
-min_samples_split = float(sys.argv[2]) if len(sys.argv) > 1 else 25
-max_depth = float(sys.argv[3]) if len(sys.argv) > 1 else 7
-max_features = float(sys.argv[4]) if len(sys.argv) > 1 else 2
+_max_iter = int(sys.argv[1]) if len(sys.argv) > 1 else 100
+_penalty = (
+    str(sys.argv[2]) if len(sys.argv) > 2 else "l2"
+)  # ‘l1’, ‘l2’, ‘elasticnet’, None
+_solver = (
+    str(sys.argv[3]) if len(sys.argv) > 3 else "liblinear"
+)  # ‘lbfgs’, ‘liblinear’, ‘newton-cg’, ‘newton-cholesky’, ‘sag’, ‘saga’
 
 with mlflow.start_run():
-    model = RandomForestClassifier(
-        n_estimators=n_estimators,
-        min_samples_split=min_samples_split,
-        max_depth=max_depth,
-        max_features=max_features,
+    Logreg = LogisticRegression(penalty=_penalty, solver=_solver, max_iter=_max_iter)
+
+    Logreg.fit(X_train, y_train)
+
+    y_pred = Logreg.predict(X_test)
+    y_predprob = Logreg.predict_proba(X_test)
+
+    acurracy = metrics.accuracy_score(y_test, y_pred)
+    precision_score = metrics.precision_score(y_test, y_pred)
+    recall_score = metrics.recall_score(y_test, y_pred)
+    f1_score = metrics.f1_score(y_test, y_pred)
+
+    print(
+        "Logestic regression Classifier (penalty={}, solver={}, max_iter={}):".format(
+            _penalty, _solver, _max_iter
+        )
     )
-    model.fit(X_train, y_train)
+    print("  acurracy: %s" % acurracy)
+    print("  precision_score: %s" % precision_score)
+    print("  recall_score: %s" % recall_score)
+    print("  f1_score: %s" % f1_score)
 
-    y_pred = model.predict(X_test)
+    mlflow.log_param("penalty", _penalty)
+    mlflow.log_param("solver", _solver)
+    mlflow.log_param("max_iter", _max_iter)
 
-    (rmse, mae, r2) = eval_metrics(y_test, y_pred)
-
-    print("Random Forest Classifier model (n_estimators={:f}, min_samples_split={:f},max_depth={:f},max_features={:f}):".format(n_estimators, min_samples_split,max_depth,max_features))
-    print("  RMSE: %s" % rmse)
-    print("  MAE: %s" % mae)
-    print("  R2: %s" % r2)
-
-    mlflow.log_param("n_estimators", n_estimators)
-    mlflow.log_param("min_samples_split", min_samples_split)
-    mlflow.log_param("max_depth", max_depth)
-    mlflow.log_param("max_features", max_features)
-    mlflow.log_metric("rmse", rmse)
-    mlflow.log_metric("r2", r2)
-    mlflow.log_metric("mae", mae)
-
+    mlflow.log_metric("acurracy", acurracy)
+    mlflow.log_metric("precision_score", precision_score)
+    mlflow.log_metric("recall_score", recall_score)
+    mlflow.log_metric("f1_score", f1_score)
 
     remote_server_uri = "https://dagshub.com/J3mai/MlOps.mlflow"
     mlflow.set_tracking_uri(remote_server_uri)
-    mlflow.sklearn.log_model(model, "model")
+    mlflow.sklearn.log_model(Logreg, "Logreg")
     mlflow.end_run()
