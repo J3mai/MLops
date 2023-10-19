@@ -3,7 +3,10 @@ import numpy as np
 import pandas as pd
 import mlflow.pyfunc
 import mlflow.tracking
+import warnings
 
+
+warnings.filterwarnings("ignore")
 # Connect to the MLflow tracking server
 mlflow.set_tracking_uri("https://dagshub.com/J3mai/MlOps.mlflow")
 
@@ -71,4 +74,9 @@ if prediction == 0:
 else:
     st.write("Diabetes")
 
-st.sidebar.subheader("Model Metrics:")
+# st.sidebar.subheader("Model Metrics:")
+# with st.sidebar:
+#     st.write("Accuracy Score:", best_run["metric.acurracy"])
+#     st.write("Precision Score:", best_run["metric.precision_score"])
+#     st.write("Recall Score:", best_run["metric.recall_score"])
+#     st.write("F1 Score:", best_run["metric.f1_score"])

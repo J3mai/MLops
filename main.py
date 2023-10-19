@@ -9,7 +9,10 @@ from sklearn import metrics
 
 import mlflow
 import mlflow.sklearn
+import warnings
 
+
+warnings.filterwarnings("ignore")
 
 df = pd.read_csv("Data/diabetes.csv")
 
