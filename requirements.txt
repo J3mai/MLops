@@ -8,4 +8,7 @@ deepchecks
 pytest
 streamlit
 numpy
-
+flask
+flask-cors
+pandas
+scikit-learn

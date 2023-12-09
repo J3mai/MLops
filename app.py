@@ -24,6 +24,8 @@ model_uri = (
 )  # Replace "Logreg" with the actual model name
 model = mlflow.pyfunc.load_model(model_uri)
 
+
+#streamlit
 st.title("Diabetes Prediction App")
 input_method = st.sidebar.radio("Select Input Method", ("Manual Entry", "Upload CSV"))
 prediction = 0
