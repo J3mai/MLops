@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 RUN pip install -r requirements.txt
 
-#EXPOSE 8080
+#EXPOSE 8081
 
 CMD ["streamlit", "run", "app.py"]
 
